@@ -4,6 +4,7 @@ import { OsiStack } from './OsiStack';
 import { DataUnit } from './DataUnit';
 import { AnimationControls } from './AnimationControls';
 import { ScenarioSelector } from './ScenarioSelector';
+import { StepDescription } from './StepDescription';
 import { getLayer } from '@/data/networkData';
 import { Cable, Wifi, Waves } from 'lucide-react';
 import type { LayerNumber } from '@/types';
@@ -74,6 +75,9 @@ export function VisualizationView() {
               </div>
             </motion.div>
           </AnimatePresence>
+
+          {/* Step description */}
+          <StepDescription />
 
           <AnimationControls />
         </div>
