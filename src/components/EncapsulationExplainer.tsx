@@ -2,37 +2,50 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { OSI_LAYERS } from '@/data/networkData';
 import { useStore } from '@/store/useStore';
+import { t, tArr } from '@/i18n/translations';
 import type { LayerNumber } from '@/types';
 
-const STAGES: { label: string; layer: LayerNumber | null; side: 'sender' | 'receiver' | 'medium' }[] = [
-  { label: 'Application Data', layer: 7, side: 'sender' },
-  { label: '+ Presentation Hdr', layer: 6, side: 'sender' },
-  { label: '+ Session Hdr', layer: 5, side: 'sender' },
-  { label: 'Segment (+ TCP Hdr)', layer: 4, side: 'sender' },
-  { label: 'Packet (+ IP Hdr)', layer: 3, side: 'sender' },
-  { label: 'Frame (+ Ethernet Hdr/Trl)', layer: 2, side: 'sender' },
-  { label: 'Bits (Physical signal)', layer: 1, side: 'medium' },
-  { label: 'Frame (received)', layer: 2, side: 'receiver' },
-  { label: 'Packet (− Ethernet)', layer: 3, side: 'receiver' },
-  { label: 'Segment (− IP)', layer: 4, side: 'receiver' },
-  { label: '− Session Hdr', layer: 5, side: 'receiver' },
-  { label: '− Presentation Hdr', layer: 6, side: 'receiver' },
-  { label: 'Application Data (− App Hdr)', layer: 7, side: 'receiver' },
+const STAGES: { labelKey: number; layer: LayerNumber | null; side: 'sender' | 'receiver' | 'medium' }[] = [
+  { labelKey: 0, layer: 7, side: 'sender' },
+  { labelKey: 1, layer: 6, side: 'sender' },
+  { labelKey: 2, layer: 5, side: 'sender' },
+  { labelKey: 3, layer: 4, side: 'sender' },
+  { labelKey: 4, layer: 3, side: 'sender' },
+  { labelKey: 5, layer: 2, side: 'sender' },
+  { labelKey: 6, layer: 1, side: 'sender' },
+  { labelKey: 7, layer: null, side: 'medium' },
+  { labelKey: 8, layer: 1, side: 'receiver' },
+  { labelKey: 9, layer: 2, side: 'receiver' },
+  { labelKey: 10, layer: 3, side: 'receiver' },
+  { labelKey: 11, layer: 4, side: 'receiver' },
+  { labelKey: 12, layer: 5, side: 'receiver' },
+  { labelKey: 13, layer: 6, side: 'receiver' },
+  { labelKey: 14, layer: 7, side: 'receiver' },
 ];
 
 export function EncapsulationExplainer() {
   const [hovered, setHovered] = useState<LayerNumber | null>(null);
   const scenario = useStore((s) => s.scenario);
+  const lang = useStore((s) => s.lang);
+  const stageLabels = tArr('stages', lang);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
       <div className="mb-6 text-center">
         <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-          Encapsulation &amp; Decapsulation Timeline
+          {t('explainerTitle', lang)}
         </h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Follow how the Protocol Data Unit (PDU) transforms as it moves down the
-          sender and up the receiver. Hover any stage to highlight its layer.
+          {t('explainerSubtitle', lang)}
+        </p>
+      </div>
+
+      <div className="mb-6 rounded-xl border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-left dark:border-amber-800/50 dark:bg-amber-950/30">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-200">
+          {t('teachingNoteTitle', lang)}
+        </h3>
+        <p className="mt-1 text-xs leading-relaxed text-amber-900/80 dark:text-amber-100/80">
+          {t('teachingNoteBody', lang)}
         </p>
       </div>
 
@@ -40,14 +53,17 @@ export function EncapsulationExplainer() {
         {/* Timeline */}
         <div className="rounded-2xl border border-slate-200 bg-white/60 p-5 dark:border-slate-800 dark:bg-slate-900/50">
           <div className="flex items-center justify-between mb-4 text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
-            <span>Sender ↓</span>
-            <span>Medium</span>
-            <span>Receiver ↑</span>
+            <span>{t('explainerSender', lang)}</span>
+            <span>{t('explainerMedium', lang)}</span>
+            <span>{t('explainerReceiver', lang)}</span>
           </div>
           <div className="flex flex-col gap-2">
             {STAGES.map((s, idx) => {
-              const color = s.layer ? OSI_LAYERS.find((l) => l.number === s.layer)!.color : '#8b5cf6';
-              const isHovered = hovered === s.layer;
+              const color = s.layer
+                ? OSI_LAYERS.find((l) => l.number === s.layer)!.color
+                : '#8b5cf6';
+              const isHovered = s.layer !== null && hovered === s.layer;
+              const label = stageLabels[s.labelKey] ?? '';
               return (
                 <motion.div
                   key={idx}
@@ -57,7 +73,7 @@ export function EncapsulationExplainer() {
                   onBlur={() => setHovered(null)}
                   tabIndex={0}
                   role="button"
-                  aria-label={s.label}
+                  aria-label={label}
                   className="flex items-center gap-3 rounded-lg p-2 outline-none transition-colors"
                   style={{
                     backgroundColor: isHovered ? `${color}22` : 'transparent',
@@ -70,7 +86,7 @@ export function EncapsulationExplainer() {
                     {s.side === 'medium' ? '∞' : s.side === 'sender' ? '↓' : '↑'}
                   </span>
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-slate-800 dark:text-slate-200">{s.label}</div>
+                    <div className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</div>
                     {s.layer && (
                       <div className="text-[10px] text-slate-400 dark:text-slate-500">
                         Layer {s.layer} • {OSI_LAYERS.find((l) => l.number === s.layer)!.name}
@@ -78,13 +94,19 @@ export function EncapsulationExplainer() {
                     )}
                   </div>
                   {s.side === 'sender' && (
-                    <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">encapsulate</span>
+                    <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                      {t('encapsulate', lang)}
+                    </span>
                   )}
                   {s.side === 'medium' && (
-                    <span className="text-[10px] font-semibold text-violet-600 dark:text-violet-400">transmit</span>
+                    <span className="text-[10px] font-semibold text-violet-600 dark:text-violet-400">
+                      {t('transmit', lang)}
+                    </span>
                   )}
                   {s.side === 'receiver' && (
-                    <span className="text-[10px] font-semibold text-sky-600 dark:text-sky-400">decapsulate</span>
+                    <span className="text-[10px] font-semibold text-sky-600 dark:text-sky-400">
+                      {t('decapsulate', lang)}
+                    </span>
                   )}
                 </motion.div>
               );
@@ -95,7 +117,9 @@ export function EncapsulationExplainer() {
         {/* Legend / live stack */}
         <div className="space-y-4">
           <div className="rounded-2xl border border-slate-200 bg-white/60 p-5 dark:border-slate-800 dark:bg-slate-900/50">
-            <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Layer Color Key</h3>
+            <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
+              {t('explainerColorKey', lang)}
+            </h3>
             <div className="flex flex-col gap-2">
               {OSI_LAYERS.map((l) => (
                 <div
@@ -117,11 +141,12 @@ export function EncapsulationExplainer() {
 
           <div className="rounded-2xl border border-slate-200 bg-white/60 p-5 dark:border-slate-800 dark:bg-slate-900/50">
             <h3 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Current Scenario
+              {t('explainerCurrentScenario', lang)}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">{scenario.description}</p>
             <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
-              Data unit: <span className="font-semibold text-slate-900 dark:text-slate-100">{scenario.dataLabel}</span>
+              {t('explainerDataUnit', lang)}{' '}
+              <span className="font-semibold text-slate-900 dark:text-slate-100">{scenario.dataLabel}</span>
             </p>
           </div>
         </div>

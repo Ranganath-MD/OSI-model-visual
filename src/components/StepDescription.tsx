@@ -2,23 +2,39 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowDown, ArrowUp, Radio, Info } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { getLayer } from '@/data/networkData';
-import { t, tTemplate, tLayerName, tHeaderName, tDataUnitName, type Lang } from '@/i18n/translations';
-import type { LayerNumber, Phase } from '@/types';
+import {
+  t,
+  tTemplate,
+  tLayerName,
+  tHeaderName,
+  tDataUnitName,
+  type Lang,
+} from '@/i18n/translations';
+import type { LayerNumber, Phase, Scenario } from '@/types';
 
 function describeStep(
   step: number,
   phases: Phase[],
-  scenarioId: string,
-  transportType: string,
+  scenario: Scenario,
   lang: Lang,
 ): { title: string; body: string; icon: typeof ArrowDown; color: string } {
   const phase = phases[step];
-  if (!phase) return { title: t('stepReady', lang), body: t('stepReadyBody', lang), icon: Info, color: '#64748b' };
+  if (!phase) {
+    return {
+      title: t('stepReady', lang),
+      body: t('stepReadyBody', lang),
+      icon: Info,
+      color: '#64748b',
+    };
+  }
 
   if (phase.kind === 'medium') {
     const mediumKey =
-      transportType === 'wifi' ? 'stepMediumWifi' :
-      transportType === 'fiber' ? 'stepMediumFiber' : 'stepMediumCable';
+      scenario.transportType === 'wifi'
+        ? 'stepMediumWifi'
+        : scenario.transportType === 'fiber'
+          ? 'stepMediumFiber'
+          : 'stepMediumCable';
     const mediumLabel = t(mediumKey as 'stepMediumWifi', lang);
     return {
       title: tTemplate('stepMediumTitle', lang, { medium: mediumLabel }),
@@ -31,14 +47,46 @@ function describeStep(
   const layerNum = phase.layer as LayerNumber;
   const layer = getLayer(layerNum);
   const layerName = tLayerName(layerNum, lang);
-  const headerName = tHeaderName(layerNum, lang);
-  const dataUnit = tDataUnitName(layerNum, lang);
-  const protoName = layer.protocols[0];
-  const nextLabel = phase.kind === 'sender'
-    ? (layer.number - 1 === 0 ? t('stepNextPhysical', lang) : String(layer.number - 1))
-    : (layer.number + 1 > 7 ? t('stepNextApplication', lang) : String(layer.number + 1));
+  const transportProto = scenario.layerProtocols[4]?.name;
+  const headerName = tHeaderName(layerNum, lang, transportProto);
+  const dataUnit = tDataUnitName(layerNum, lang, transportProto);
+  const protoName = scenario.layerProtocols[layerNum]?.name ?? layer.protocols[0];
+  const nextLabel =
+    phase.kind === 'sender'
+      ? layer.number - 1 === 0
+        ? t('stepNextPhysical', lang)
+        : String(layer.number - 1)
+      : layer.number + 1 > 7
+        ? t('stepNextApplication', lang)
+        : String(layer.number + 1);
 
   if (phase.kind === 'sender') {
+    if (layerNum === 1) {
+      return {
+        title: tTemplate('stepSenderTitlePhysical', lang, {
+          n: String(layer.number),
+          layer: layerName,
+        }),
+        body: tTemplate('stepSenderBodyPhysical', lang, { proto: protoName }),
+        icon: ArrowDown,
+        color: layer.color,
+      };
+    }
+    if (layerNum === 7) {
+      return {
+        title: tTemplate('stepSenderTitleApp', lang, {
+          n: String(layer.number),
+          layer: layerName,
+          header: headerName,
+        }),
+        body: tTemplate('stepSenderBodyApp', lang, {
+          proto: protoName,
+          dataUnit,
+        }),
+        icon: ArrowDown,
+        color: layer.color,
+      };
+    }
     return {
       title: tTemplate('stepSenderTitle', lang, {
         n: String(layer.number),
@@ -53,6 +101,33 @@ function describeStep(
         next: nextLabel,
       }),
       icon: ArrowDown,
+      color: layer.color,
+    };
+  }
+
+  if (layerNum === 1) {
+    return {
+      title: tTemplate('stepReceiverTitlePhysical', lang, {
+        n: String(layer.number),
+        layer: layerName,
+      }),
+      body: tTemplate('stepReceiverBodyPhysical', lang, { proto: protoName }),
+      icon: ArrowUp,
+      color: layer.color,
+    };
+  }
+  if (layerNum === 7) {
+    return {
+      title: tTemplate('stepReceiverTitleApp', lang, {
+        n: String(layer.number),
+        layer: layerName,
+        header: headerName,
+      }),
+      body: tTemplate('stepReceiverBodyApp', lang, {
+        proto: protoName,
+        dataUnit,
+      }),
+      icon: ArrowUp,
       color: layer.color,
     };
   }
@@ -81,13 +156,7 @@ export function StepDescription() {
   const scenario = useStore((s) => s.scenario);
   const lang = useStore((s) => s.lang);
 
-  const { title, body, icon: Icon, color } = describeStep(
-    step,
-    phases,
-    scenario.id,
-    scenario.transportType,
-    lang,
-  );
+  const { title, body, icon: Icon, color } = describeStep(step, phases, scenario, lang);
 
   return (
     <motion.div

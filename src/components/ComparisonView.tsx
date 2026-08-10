@@ -1,19 +1,33 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { OSI_LAYERS, TCPIP_LAYERS } from '@/data/networkData';
 import { useStore } from '@/store/useStore';
+import { t, tArr } from '@/i18n/translations';
 import type { LayerNumber } from '@/types';
 
 export function ComparisonView() {
   const model = useStore((s) => s.model);
   const setModel = useStore((s) => s.setModel);
+  const lang = useStore((s) => s.lang);
+  const mapping = tArr('mappingSummary', lang);
+  const flowSteps = tArr('tcpFlowSteps', lang);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
       <div className="mb-6 text-center">
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">OSI vs TCP/IP Model</h2>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+          {t('comparisonTitle', lang)}
+        </h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          The TCP/IP model condenses the 7 OSI layers into 4 practical layers.
-          Toggle to see the mapping.
+          {t('comparisonSubtitle', lang)}
+        </p>
+      </div>
+
+      <div className="mb-6 rounded-xl border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-left dark:border-amber-800/50 dark:bg-amber-950/30">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-200">
+          {t('teachingNoteTitle', lang)}
+        </h3>
+        <p className="mt-1 text-xs leading-relaxed text-amber-900/80 dark:text-amber-100/80">
+          {t('teachingNoteBody', lang)}
         </p>
       </div>
 
@@ -25,7 +39,9 @@ export function ComparisonView() {
               onClick={() => setModel(m)}
               aria-pressed={model === m}
               className={`relative rounded-lg px-4 py-1.5 text-xs font-medium transition-colors ${
-                model === m ? 'text-white' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                model === m
+                  ? 'text-white'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
               }`}
             >
               {model === m && (
@@ -35,16 +51,19 @@ export function ComparisonView() {
                   transition={{ type: 'spring', stiffness: 300, damping: 26 }}
                 />
               )}
-              <span className="relative">{m === 'osi' ? 'OSI (7 layers)' : 'TCP/IP (4 layers)'}</span>
+              <span className="relative">
+                {m === 'osi' ? t('comparisonOsi', lang) : t('comparisonTcpip', lang)}
+              </span>
             </button>
           ))}
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {/* OSI side */}
         <div className="rounded-2xl border border-slate-200 bg-white/60 p-4 dark:border-slate-800 dark:bg-slate-900/50">
-          <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">OSI Model</h3>
+          <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
+            {t('comparisonOsiModel', lang)}
+          </h3>
           <div className="flex flex-col gap-2">
             {OSI_LAYERS.map((l) => (
               <ComparisonRow
@@ -58,29 +77,37 @@ export function ComparisonView() {
           </div>
         </div>
 
-        {/* TCP/IP side */}
         <div className="rounded-2xl border border-slate-200 bg-white/60 p-4 dark:border-slate-800 dark:bg-slate-900/50">
-          <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">TCP/IP Model</h3>
+          <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
+            {t('comparisonTcpipModel', lang)}
+          </h3>
           <div className="flex flex-col gap-2">
-            {TCPIP_LAYERS.map((t) => (
-              <TcpRow key={t.name} name={t.name} color={t.color} protocols={t.protocols} osi={t.osiLayers} />
+            {TCPIP_LAYERS.map((tcp) => (
+              <TcpRow
+                key={tcp.name}
+                name={tcp.name}
+                color={tcp.color}
+                protocols={tcp.protocols}
+                osi={tcp.osiLayers}
+              />
             ))}
           </div>
         </div>
       </div>
 
       <div className="mt-6 rounded-2xl border border-slate-200 bg-white/60 p-5 dark:border-slate-800 dark:bg-slate-900/50">
-        <h3 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Mapping Summary</h3>
+        <h3 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
+          {t('comparisonSummary', lang)}
+        </h3>
         <ul className="space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
-          <li>• <b className="text-slate-900 dark:text-slate-100">Application</b> (TCP/IP) = OSI L5–L7 (Session, Presentation, Application)</li>
-          <li>• <b className="text-slate-900 dark:text-slate-100">Transport</b> (TCP/IP) = OSI L4 (Transport) — identical</li>
-          <li>• <b className="text-slate-900 dark:text-slate-100">Internet</b> (TCP/IP) = OSI L3 (Network) — identical</li>
-          <li>• <b className="text-slate-900 dark:text-slate-100">Network Access</b> (TCP/IP) = OSI L1–L2 (Physical, Data Link)</li>
+          {mapping.map((line) => (
+            <li key={line}>• {line}</li>
+          ))}
         </ul>
       </div>
 
       <AnimatePresence>
-        {model === 'tcpip' && <TcpFlowAnimation />}
+        {model === 'tcpip' && <TcpFlowAnimation steps={[...flowSteps]} title={t('comparisonFlow', lang)} />}
       </AnimatePresence>
     </div>
   );
@@ -138,7 +165,8 @@ function TcpRow({
         <span className="h-3 w-3 rounded" style={{ backgroundColor: color }} />
         <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{name}</span>
         <span className="ml-auto text-[10px] text-slate-400 dark:text-slate-500">
-          OSI L{osi[0]}{osi.length > 1 ? `–L${osi[osi.length - 1]}` : ''}
+          OSI L{osi[0]}
+          {osi.length > 1 ? `–L${osi[osi.length - 1]}` : ''}
         </span>
       </div>
       <div className="mt-2 flex flex-wrap gap-1">
@@ -155,8 +183,7 @@ function TcpRow({
   );
 }
 
-function TcpFlowAnimation() {
-  const steps = ['Data', '+ TCP Hdr → Segment', '+ IP Hdr → Packet', 'Frame / Bits', '→ receive →', 'Application Data'];
+function TcpFlowAnimation({ steps, title }: { steps: string[]; title: string }) {
   return (
     <motion.div
       className="mt-6 rounded-2xl border border-emerald-300/50 bg-emerald-50/60 p-5 dark:border-emerald-800/40 dark:bg-emerald-950/20"
@@ -164,9 +191,7 @@ function TcpFlowAnimation() {
       animate={{ opacity: 1, height: 'auto' }}
       exit={{ opacity: 0, height: 0 }}
     >
-      <h3 className="mb-3 text-sm font-semibold text-emerald-700 dark:text-emerald-200">
-        TCP/IP Encapsulation Flow
-      </h3>
+      <h3 className="mb-3 text-sm font-semibold text-emerald-700 dark:text-emerald-200">{title}</h3>
       <div className="flex flex-wrap items-center gap-2">
         {steps.map((s, i) => (
           <div key={i} className="flex items-center gap-2">
@@ -178,7 +203,9 @@ function TcpFlowAnimation() {
             >
               {s}
             </motion.span>
-            {i < steps.length - 1 && <span className="text-emerald-600 dark:text-emerald-500">→</span>}
+            {i < steps.length - 1 && (
+              <span className="text-emerald-600 dark:text-emerald-500">→</span>
+            )}
           </div>
         ))}
       </div>

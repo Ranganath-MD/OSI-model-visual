@@ -14,14 +14,14 @@ export function DataUnit({ side }: Props) {
 
   const levels: EncapLevel[] =
     side === 'sender'
-      ? senderEncapsulation(step, phases)
-      : receiverDecapsulation(step, phases);
+      ? senderEncapsulation(step, phases, scenario)
+      : receiverDecapsulation(step, phases, scenario);
 
   const currentPhase = phases[step];
   const isThisSideActive = currentPhase && currentPhase.kind === side;
   const isMediumActive = currentPhase?.kind === 'medium';
 
-  const unitName = currentDataUnitName(step, phases);
+  const unitName = currentDataUnitName(step, phases, scenario);
   const showStack = levels.length > 0;
   const dataLabel = scenario.dataLabel;
 

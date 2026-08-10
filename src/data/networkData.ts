@@ -13,7 +13,7 @@ export const OSI_LAYERS: LayerInfo[] = [
     ],
     protocols: ['HTTP', 'HTTPS', 'SMTP', 'FTP', 'DNS'],
     devices: ['Web browsers', 'Mail clients'],
-    headerName: 'Application Data',
+    headerName: 'Application payload',
     dataUnitName: 'Data',
     color: '#ef4444',
   },
@@ -24,12 +24,12 @@ export const OSI_LAYERS: LayerInfo[] = [
     description: 'Translation, encryption, and compression of data.',
     responsibilities: [
       'Translates data between application and network formats',
-      'Encrypts and decrypts data for secure transfer',
-      'Compresses data to optimize transmission',
+      'Encrypts and decrypts data for secure transfer (e.g. TLS)',
+      'Compresses or encodes data (e.g. codecs, MIME)',
     ],
-    protocols: ['TLS', 'SSL', 'JPEG', 'ASCII', 'MIME'],
-    devices: ['Gateways', 'Encryption libraries'],
-    headerName: 'Presentation Header',
+    protocols: ['TLS', 'JPEG', 'ASCII', 'MIME'],
+    devices: ['TLS stacks in apps', 'Codecs / format handlers'],
+    headerName: 'Presentation Header (OSI)',
     dataUnitName: 'Data',
     color: '#f97316',
   },
@@ -43,9 +43,9 @@ export const OSI_LAYERS: LayerInfo[] = [
       'Handles dialog control and synchronization',
       'Manages checkpoints and recovery',
     ],
-    protocols: ['NetBIOS', 'RPC', 'PPTP', 'Sockets'],
-    devices: ['Session managers'],
-    headerName: 'Session Header',
+    protocols: ['NetBIOS', 'RPC', 'SIP'],
+    devices: ['SIP proxies', 'RPC services'],
+    headerName: 'Session Header (OSI)',
     dataUnitName: 'Data',
     color: '#eab308',
   },
@@ -53,16 +53,16 @@ export const OSI_LAYERS: LayerInfo[] = [
     number: 4,
     name: 'Transport',
     shortName: 'Trans',
-    description: 'Reliable end-to-end delivery and flow control.',
+    description: 'End-to-end delivery, segmentation, and flow control.',
     responsibilities: [
-      'Segments data into units and reassembles them',
-      'Provides reliable, ordered delivery (TCP) or fast (UDP)',
-      'Handles error control and flow control',
+      'Segments (TCP) or datagrams (UDP) data and reassembles it',
+      'Provides reliable, ordered delivery (TCP) or fast delivery (UDP)',
+      'Handles error control and flow control (mainly TCP)',
     ],
     protocols: ['TCP', 'UDP', 'QUIC'],
-    devices: ['Firewalls (some)', 'Load balancers'],
-    headerName: 'TCP Header',
-    dataUnitName: 'Segment',
+    devices: ['Hosts (OS stack)', 'L4-aware firewalls / load balancers'],
+    headerName: 'TCP/UDP Header',
+    dataUnitName: 'Segment / Datagram',
     color: '#22c55e',
   },
   {
@@ -88,10 +88,10 @@ export const OSI_LAYERS: LayerInfo[] = [
     description: 'Node-to-node delivery over a physical link.',
     responsibilities: [
       'Frames data with MAC addressing',
-      'Error detection (CRC) and correction',
+      'Error detection (CRC); frames with errors are typically dropped',
       'Media Access Control (MAC)',
     ],
-    protocols: ['Ethernet', 'Wi-Fi (802.11)', 'PPP', 'ARP'],
+    protocols: ['Ethernet', 'Wi-Fi (802.11)', 'PPP', 'ARP (L2/L3)'],
     devices: ['Switches', 'Bridges', 'NICs'],
     headerName: 'Ethernet Header & Trailer',
     dataUnitName: 'Frame',
@@ -105,11 +105,11 @@ export const OSI_LAYERS: LayerInfo[] = [
     responsibilities: [
       'Transmits raw bit stream over physical media',
       'Defines voltage, timing, and cable specs',
-      'Converts bits to signals (electrical, optical, radio)',
+      'Converts bits to signals (electrical, optical, radio) — no protocol header',
     ],
     protocols: ['Ethernet PHY', 'Wi-Fi PHY', 'Bluetooth radio'],
     devices: ['Hubs', 'Repeaters', 'Cables', 'Fiber', 'NICs'],
-    headerName: 'Bits (Signal)',
+    headerName: 'Bit stream (no header)',
     dataUnitName: 'Bits',
     color: '#8b5cf6',
   },
@@ -119,7 +119,7 @@ export const TCPIP_LAYERS: TcpIpLayer[] = [
   {
     name: 'Application',
     osiLayers: [7, 6, 5],
-    description: 'Merges OSI Application, Presentation, and Session layers.',
+    description: 'Maps to OSI Application, Presentation, and Session layers.',
     protocols: ['HTTP', 'SMTP', 'FTP', 'DNS', 'TLS'],
     headerName: 'Application Data',
     dataUnitName: 'Data',
@@ -128,16 +128,16 @@ export const TCPIP_LAYERS: TcpIpLayer[] = [
   {
     name: 'Transport',
     osiLayers: [4],
-    description: 'Same as OSI Transport — end-to-end delivery.',
+    description: 'Same role as OSI Transport — end-to-end delivery.',
     protocols: ['TCP', 'UDP', 'QUIC'],
-    headerName: 'TCP Header',
-    dataUnitName: 'Segment',
+    headerName: 'TCP/UDP Header',
+    dataUnitName: 'Segment / Datagram',
     color: '#22c55e',
   },
   {
     name: 'Internet',
     osiLayers: [3],
-    description: 'Same as OSI Network — routing and IP addressing.',
+    description: 'Same role as OSI Network — routing and IP addressing.',
     protocols: ['IP', 'ICMP'],
     headerName: 'IP Header',
     dataUnitName: 'Packet',
@@ -146,7 +146,7 @@ export const TCPIP_LAYERS: TcpIpLayer[] = [
   {
     name: 'Network Access',
     osiLayers: [2, 1],
-    description: 'Merges OSI Data Link and Physical layers.',
+    description: 'Maps to OSI Data Link and Physical layers.',
     protocols: ['Ethernet', 'Wi-Fi'],
     headerName: 'Frame Header & Trailer',
     dataUnitName: 'Frame / Bits',
@@ -163,8 +163,8 @@ export const SCENARIOS: Scenario[] = [
     transportType: 'cable',
     layerProtocols: {
       7: { name: 'SMTP' },
-      6: { name: 'MIME' },
-      5: { name: 'TCP Session' },
+      6: { name: 'MIME', note: 'OSI Presentation role; often handled in the app' },
+      5: { name: 'Dialog (OSI)', note: 'Conceptual Session; real stacks fold this into TCP/apps' },
       4: { name: 'TCP' },
       3: { name: 'IP' },
       2: { name: 'Ethernet' },
@@ -179,8 +179,8 @@ export const SCENARIOS: Scenario[] = [
     transportType: 'fiber',
     layerProtocols: {
       7: { name: 'HTTP' },
-      6: { name: 'TLS' },
-      5: { name: 'TCP Session' },
+      6: { name: 'TLS', note: 'Often taught as Presentation; sits above TCP in real stacks' },
+      5: { name: 'Dialog (OSI)', note: 'Conceptual Session; TLS/TCP handle continuity in practice' },
       4: { name: 'TCP' },
       3: { name: 'IP' },
       2: { name: 'Ethernet' },
@@ -190,13 +190,13 @@ export const SCENARIOS: Scenario[] = [
   {
     id: 'video',
     label: 'Streaming a Video',
-    description: 'A media player streams video chunks over UDP.',
+    description: 'A media player streams video using RTP over UDP (not classic DASH/HTTP).',
     dataLabel: 'Video Chunk',
     transportType: 'wifi',
     layerProtocols: {
-      7: { name: 'HTTP / DASH' },
-      6: { name: 'Compression' },
-      5: { name: 'RTP Session' },
+      7: { name: 'RTP' },
+      6: { name: 'Codec / Compression', note: 'Presentation-style encoding of media' },
+      5: { name: 'RTCP sync', note: 'Stream timing/sync (Session-like role)' },
       4: { name: 'UDP' },
       3: { name: 'IP' },
       2: { name: 'Wi-Fi 802.11' },
@@ -215,4 +215,29 @@ export const OSI_LAYER_MAP: Record<LayerNumber, LayerInfo> = OSI_LAYERS.reduce(
 
 export function getLayer(n: LayerNumber): LayerInfo {
   return OSI_LAYER_MAP[n];
+}
+
+/** True when this layer adds a discrete protocol header (not L1 signaling / L7 payload). */
+export function layerAddsHeader(n: LayerNumber): boolean {
+  return n !== 1 && n !== 7;
+}
+
+export function isUdpScenario(scenario: Scenario): boolean {
+  return scenario.layerProtocols[4]?.name === 'UDP';
+}
+
+/** Scenario-aware header / processing label for animation and details. */
+export function resolveHeaderName(layer: LayerNumber, scenario: Scenario): string {
+  if (layer === 4) {
+    return isUdpScenario(scenario) ? 'UDP Header' : 'TCP Header';
+  }
+  return OSI_LAYER_MAP[layer].headerName;
+}
+
+/** Scenario-aware PDU name (TCP → Segment, UDP → Datagram). */
+export function resolveDataUnitName(layer: LayerNumber, scenario: Scenario): string {
+  if (layer === 4) {
+    return isUdpScenario(scenario) ? 'Datagram' : 'Segment';
+  }
+  return OSI_LAYER_MAP[layer].dataUnitName;
 }

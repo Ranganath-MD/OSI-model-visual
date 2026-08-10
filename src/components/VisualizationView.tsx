@@ -83,7 +83,7 @@ export function VisualizationView() {
                 {currentPhase?.kind === 'medium'
                   ? `${t('bitsTraveling', lang)} ${mediumLabel}`
                   : activeLayerInfo
-                    ? `L${activeLayerInfo.number} ${tLayerName(activeLayerInfo.number, lang)}: ${tHeaderName(activeLayerInfo.number, lang)}`
+                    ? `L${activeLayerInfo.number} ${tLayerName(activeLayerInfo.number, lang)}: ${tHeaderName(activeLayerInfo.number, lang, scenario.layerProtocols[4]?.name)}`
                     : t('ready', lang)}
               </div>
             </motion.div>

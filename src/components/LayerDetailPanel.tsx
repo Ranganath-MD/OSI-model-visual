@@ -1,11 +1,19 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useStore } from '@/store/useStore';
-import { getLayer } from '@/data/networkData';
+import {
+  getLayer,
+  layerAddsHeader,
+  resolveDataUnitName,
+  resolveHeaderName,
+} from '@/data/networkData';
+import { tLayerResponsibilities } from '@/i18n/translations';
 
 export function LayerDetailPanel() {
   const selectedLayer = useStore((s) => s.selectedLayer);
   const closeLayer = useStore((s) => s.closeLayer);
+  const scenario = useStore((s) => s.scenario);
+  const lang = useStore((s) => s.lang);
 
   return (
     <AnimatePresence>
@@ -31,6 +39,12 @@ export function LayerDetailPanel() {
           >
             {(() => {
               const layer = getLayer(selectedLayer);
+              const headerLabel = resolveHeaderName(selectedLayer, scenario);
+              const pduName = resolveDataUnitName(selectedLayer, scenario);
+              const responsibilities = tLayerResponsibilities(selectedLayer, lang);
+              const addsHeader = layerAddsHeader(selectedLayer);
+              const scenarioProto = scenario.layerProtocols[selectedLayer];
+
               return (
                 <>
                   <div
@@ -66,7 +80,7 @@ export function LayerDetailPanel() {
                         Key Responsibilities
                       </h3>
                       <ul className="space-y-1.5">
-                        {layer.responsibilities.map((r) => (
+                        {responsibilities.map((r) => (
                           <li key={r} className="flex gap-2 text-sm text-slate-700 dark:text-slate-300">
                             <span style={{ color: layer.color }} aria-hidden>•</span>
                             {r}
@@ -95,6 +109,12 @@ export function LayerDetailPanel() {
                             </span>
                           ))}
                         </div>
+                        {scenarioProto && (
+                          <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
+                            This scenario: <span className="font-medium text-slate-700 dark:text-slate-200">{scenarioProto.name}</span>
+                            {scenarioProto.note ? ` — ${scenarioProto.note}` : ''}
+                          </p>
+                        )}
                       </div>
                       <div>
                         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -121,13 +141,15 @@ export function LayerDetailPanel() {
                         <p>
                           <span className="text-slate-500 dark:text-slate-400">PDU name:</span>{' '}
                           <span className="font-semibold text-slate-900 dark:text-slate-100">
-                            {layer.dataUnitName}
+                            {pduName}
                           </span>
                         </p>
                         <p className="mt-1">
-                          <span className="text-slate-500 dark:text-slate-400">Adds/Removes:</span>{' '}
+                          <span className="text-slate-500 dark:text-slate-400">
+                            {addsHeader ? 'Adds/Removes:' : 'Processing:'}
+                          </span>{' '}
                           <span style={{ color: layer.color }} className="font-semibold">
-                            {layer.headerName}
+                            {headerLabel}
                           </span>
                         </p>
                       </div>
@@ -138,13 +160,35 @@ export function LayerDetailPanel() {
                         Encapsulation / Decapsulation
                       </h3>
                       <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
-                        <p className="text-sm text-slate-700 dark:text-slate-300">
-                          <span style={{ color: layer.color }}>Sender (↓):</span> wraps
-                          the data with {layer.headerName}.{' '}
-                          <span style={{ color: layer.color }}>Receiver (↑):</span>{' '}
-                          removes that header and passes the payload up to the next
-                          layer.
-                        </p>
+                        {selectedLayer === 1 ? (
+                          <p className="text-sm text-slate-700 dark:text-slate-300">
+                            <span style={{ color: layer.color }}>Sender (↓):</span> converts the
+                            frame into a bit stream and drives signals onto the medium — no
+                            protocol header is added.{' '}
+                            <span style={{ color: layer.color }}>Receiver (↑):</span> recovers
+                            bits from signals and passes them up to Data Link.
+                          </p>
+                        ) : selectedLayer === 7 ? (
+                          <p className="text-sm text-slate-700 dark:text-slate-300">
+                            <span style={{ color: layer.color }}>Sender (↓):</span> creates the
+                            application payload ({headerLabel}).{' '}
+                            <span style={{ color: layer.color }}>Receiver (↑):</span> delivers
+                            that payload to the user application.
+                          </p>
+                        ) : (
+                          <p className="text-sm text-slate-700 dark:text-slate-300">
+                            <span style={{ color: layer.color }}>Sender (↓):</span> wraps the
+                            data with {headerLabel}.{' '}
+                            <span style={{ color: layer.color }}>Receiver (↑):</span> removes
+                            that header and passes the payload up to the next layer.
+                            {(selectedLayer === 5 || selectedLayer === 6) && (
+                              <span className="mt-2 block text-xs text-slate-500 dark:text-slate-400">
+                                Note: In real TCP/IP stacks, Session/Presentation rarely add
+                                separate headers — those roles often live in apps or TLS.
+                              </span>
+                            )}
+                          </p>
+                        )}
                       </div>
                     </section>
                   </div>

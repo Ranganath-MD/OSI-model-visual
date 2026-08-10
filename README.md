@@ -17,11 +17,11 @@ npm run typecheck
 
 - **7 OSI layers** (L7 Application → L1 Physical) shown as two clickable stacks: Sender (left) and Receiver (right).
 - **Animated data flow**: a data unit (Email, Web Request, or Video Chunk) travels down the sender stack (encapsulation — headers/trailers are added) and up the receiver stack (decapsulation — headers are stripped).
-- **Data unit naming** changes as it moves: **Data → Segment → Packet → Frame → Bits** and back.
+- **Data unit naming** changes as it moves: **Data → Segment/Datagram → Packet → Frame → Bits** and back (TCP → Segment, UDP → Datagram).
 - **Layer detail panels**: click any layer for responsibilities, protocols, devices, and a mini encapsulation/decapsulation note.
 - **Encapsulation timeline view**: a full stage-by-stage diagram with hover-to-highlight.
-- **OSI vs TCP/IP comparison**: toggle to see the 4-layer TCP/IP model mapped onto the 7 OSI layers, with an animated TCP/IP encapsulation flow.
-- **Predefined scenarios**: Sending an Email (SMTP), Loading a Webpage (HTTPS), Streaming a Video — each labels the right protocol at each layer and picks the right physical medium (cable / fiber / Wi-Fi).
+- **OSI vs TCP/IP comparison**: toggle to see the 4-layer TCP/IP model mapped onto the 7 OSI layers, with an animated TCP/IP encapsulation flow and a short **OSI theory vs real TCP/IP** note.
+- **Predefined scenarios**: Sending an Email (SMTP), Loading a Webpage (HTTPS), Streaming a Video (RTP/UDP) — each labels the right protocol at each layer and picks the right physical medium (cable / fiber / Wi-Fi).
 - **Dark/light mode** toggle and a short **onboarding tour**.
 
 ## Controls
