@@ -27,10 +27,10 @@ export function EncapsulationExplainer() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
       <div className="mb-6 text-center">
-        <h2 className="text-xl font-bold text-slate-100">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
           Encapsulation &amp; Decapsulation Timeline
         </h2>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Follow how the Protocol Data Unit (PDU) transforms as it moves down the
           sender and up the receiver. Hover any stage to highlight its layer.
         </p>
@@ -38,8 +38,8 @@ export function EncapsulationExplainer() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         {/* Timeline */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
-          <div className="flex items-center justify-between mb-4 text-[11px] uppercase tracking-wider text-slate-500">
+        <div className="rounded-2xl border border-slate-200 bg-white/60 p-5 dark:border-slate-800 dark:bg-slate-900/50">
+          <div className="flex items-center justify-between mb-4 text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
             <span>Sender ↓</span>
             <span>Medium</span>
             <span>Receiver ↑</span>
@@ -70,21 +70,21 @@ export function EncapsulationExplainer() {
                     {s.side === 'medium' ? '∞' : s.side === 'sender' ? '↓' : '↑'}
                   </span>
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-slate-200">{s.label}</div>
+                    <div className="text-sm font-medium text-slate-800 dark:text-slate-200">{s.label}</div>
                     {s.layer && (
-                      <div className="text-[10px] text-slate-500">
+                      <div className="text-[10px] text-slate-400 dark:text-slate-500">
                         Layer {s.layer} • {OSI_LAYERS.find((l) => l.number === s.layer)!.name}
                       </div>
                     )}
                   </div>
                   {s.side === 'sender' && (
-                    <span className="text-[10px] font-semibold text-emerald-400">encapsulate</span>
+                    <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">encapsulate</span>
                   )}
                   {s.side === 'medium' && (
-                    <span className="text-[10px] font-semibold text-violet-400">transmit</span>
+                    <span className="text-[10px] font-semibold text-violet-600 dark:text-violet-400">transmit</span>
                   )}
                   {s.side === 'receiver' && (
-                    <span className="text-[10px] font-semibold text-sky-400">decapsulate</span>
+                    <span className="text-[10px] font-semibold text-sky-600 dark:text-sky-400">decapsulate</span>
                   )}
                 </motion.div>
               );
@@ -94,8 +94,8 @@ export function EncapsulationExplainer() {
 
         {/* Legend / live stack */}
         <div className="space-y-4">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
-            <h3 className="mb-3 text-sm font-semibold text-slate-100">Layer Color Key</h3>
+          <div className="rounded-2xl border border-slate-200 bg-white/60 p-5 dark:border-slate-800 dark:bg-slate-900/50">
+            <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Layer Color Key</h3>
             <div className="flex flex-col gap-2">
               {OSI_LAYERS.map((l) => (
                 <div
@@ -106,22 +106,22 @@ export function EncapsulationExplainer() {
                   style={{ backgroundColor: hovered === l.number ? `${l.color}22` : 'transparent' }}
                 >
                   <span className="h-3 w-3 rounded" style={{ backgroundColor: l.color }} />
-                  <span className="text-xs text-slate-300">
+                  <span className="text-xs text-slate-600 dark:text-slate-300">
                     L{l.number} {l.name}
                   </span>
-                  <span className="ml-auto text-[10px] text-slate-500">{l.dataUnitName}</span>
+                  <span className="ml-auto text-[10px] text-slate-400 dark:text-slate-500">{l.dataUnitName}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
-            <h3 className="mb-2 text-sm font-semibold text-slate-100">
+          <div className="rounded-2xl border border-slate-200 bg-white/60 p-5 dark:border-slate-800 dark:bg-slate-900/50">
+            <h3 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
               Current Scenario
             </h3>
-            <p className="text-xs text-slate-400">{scenario.description}</p>
-            <p className="mt-2 text-xs text-slate-300">
-              Data unit: <span className="font-semibold text-slate-100">{scenario.dataLabel}</span>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{scenario.description}</p>
+            <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
+              Data unit: <span className="font-semibold text-slate-900 dark:text-slate-100">{scenario.dataLabel}</span>
             </p>
           </div>
         </div>

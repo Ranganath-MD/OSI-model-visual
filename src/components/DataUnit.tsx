@@ -22,13 +22,10 @@ export function DataUnit({ side }: Props) {
       : receiverDecapsulation(step, phases);
 
   const currentPhase = phases[step];
-  const isThisSideActive =
-    currentPhase && currentPhase.kind === side;
+  const isThisSideActive = currentPhase && currentPhase.kind === side;
   const isMediumActive = currentPhase?.kind === 'medium';
 
   const unitName = currentDataUnitName(step, phases);
-
-  // For the receiver, before its turn, show full stack (mirror of sender at L1)
   const showStack = levels.length > 0;
 
   return (
@@ -38,12 +35,10 @@ export function DataUnit({ side }: Props) {
       aria-label={`Data unit on ${side} side: ${unitName}`}
     >
       <div className="mb-2 flex items-center gap-2">
-        <span className="text-[11px] uppercase tracking-wider text-slate-400">
+        <span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
           Current PDU
         </span>
-        <span
-          className="rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-semibold text-slate-100"
-        >
+        <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-semibold text-slate-800 dark:bg-slate-800 dark:text-slate-100">
           {unitName}
         </span>
       </div>
@@ -51,7 +46,6 @@ export function DataUnit({ side }: Props) {
       <div className="relative flex min-h-[180px] w-full max-w-[260px] flex-col items-stretch justify-center">
         <AnimatePresence mode="popLayout">
           {showStack ? (
-            // Stack headers outermost-first: top = lowest layer processed
             levels.map((lvl, idx) => {
               const isOuter = idx === 0;
               return (
@@ -74,7 +68,7 @@ export function DataUnit({ side }: Props) {
                   {isOuter && isThisSideActive && (
                     <motion.span
                       layoutId={`adding-${side}`}
-                      className="ml-1 inline-block text-emerald-300"
+                      className="ml-1 inline-block text-emerald-500 dark:text-emerald-300"
                       aria-hidden
                     >
                       +
@@ -86,19 +80,19 @@ export function DataUnit({ side }: Props) {
           ) : null}
         </AnimatePresence>
 
-        {/* Payload */}
         <motion.div
           layout
-          className="rounded-lg border-2 border-slate-600 bg-slate-900 px-3 py-3 text-center"
+          className="rounded-lg border-2 bg-white px-3 py-3 text-center dark:bg-slate-900"
           animate={{
             scale: isThisSideActive ? 1.04 : 1,
-            borderColor: isThisSideActive ? '#10b981' : 'rgba(71,85,105,1)',
+            borderColor: isThisSideActive ? '#10b981' : undefined,
           }}
+          style={{ borderColor: isThisSideActive ? undefined : 'rgba(100,116,139,0.5)' }}
         >
-          <div className="text-[10px] uppercase tracking-wider text-slate-500">
+          <div className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
             Payload
           </div>
-          <div className="mt-0.5 text-sm font-semibold text-slate-100">
+          <div className="mt-0.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
             {scenario.dataLabel}
           </div>
         </motion.div>
@@ -120,14 +114,12 @@ function MediumTrail() {
       {Array.from({ length: 8 }).map((_, i) => (
         <motion.span
           key={i}
-          className="h-1.5 w-1.5 rounded-full bg-violet-400"
+          className="h-1.5 w-1.5 rounded-full bg-violet-500 dark:bg-violet-400"
           animate={{ opacity: [0.2, 1, 0.2] }}
           transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.08 }}
         />
       ))}
-      <span className="ml-2 text-[10px] text-violet-300">bits traveling…</span>
+      <span className="ml-2 text-[10px] text-violet-600 dark:text-violet-300">bits traveling…</span>
     </motion.div>
   );
 }
-
-

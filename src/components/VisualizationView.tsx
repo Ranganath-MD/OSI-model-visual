@@ -38,10 +38,10 @@ export function VisualizationView() {
         {/* Center: data units + medium */}
         <div className="flex flex-col items-center gap-4">
           <div className="grid w-full grid-cols-2 gap-4">
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-3">
+            <div className="rounded-2xl border border-slate-200 bg-white/60 p-3 dark:border-slate-800 dark:bg-slate-900/40">
               <DataUnit side="sender" />
             </div>
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-3">
+            <div className="rounded-2xl border border-slate-200 bg-white/60 p-3 dark:border-slate-800 dark:bg-slate-900/40">
               <DataUnit side="receiver" />
             </div>
           </div>
@@ -62,10 +62,10 @@ export function VisualizationView() {
               }}
               aria-live="polite"
             >
-              <div className="text-[11px] uppercase tracking-wider text-slate-400">
+              <div className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 {action}
               </div>
-              <div className="text-sm font-semibold text-slate-100">
+              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                 {currentPhase?.kind === 'medium'
                   ? `Bits traveling via ${scenario.transportType}`
                   : activeLayerInfo
@@ -100,18 +100,18 @@ function Medium({
 
   return (
     <motion.div
-      className="flex w-full max-w-md items-center justify-center gap-3 rounded-xl border border-violet-800/40 bg-violet-950/20 px-4 py-3"
+      className="flex w-full max-w-md items-center justify-center gap-3 rounded-xl border border-violet-300/60 bg-violet-100/50 px-4 py-3 dark:border-violet-800/40 dark:bg-violet-950/20"
       animate={{ boxShadow: active ? '0 0 22px #8b5cf688' : '0 0 0px #00000000' }}
     >
-      <Icon className="h-5 w-5 text-violet-300" />
-      <div className="relative h-1 flex-1 overflow-hidden rounded-full bg-violet-900/50">
+      <Icon className="h-5 w-5 text-violet-600 dark:text-violet-300" />
+      <div className="relative h-1 flex-1 overflow-hidden rounded-full bg-violet-300/50 dark:bg-violet-900/50">
         <motion.div
           className="absolute top-0 h-full w-8 rounded-full bg-violet-400"
           animate={active ? { left: ['0%', '100%'] } : { left: '0%' }}
           transition={active ? { duration: 1.4, repeat: Infinity, ease: 'linear' } : {}}
         />
       </div>
-      <span className="text-[11px] text-violet-200">{label}</span>
+      <span className="text-[11px] text-violet-700 dark:text-violet-200">{label}</span>
     </motion.div>
   );
 }

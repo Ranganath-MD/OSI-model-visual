@@ -9,7 +9,7 @@ export function ScenarioSelector() {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
         <Network className="h-4 w-4" />
         Scenario
       </div>
@@ -25,8 +25,8 @@ export function ScenarioSelector() {
               aria-pressed={active}
               className={`rounded-xl border px-3 py-2 text-left text-xs transition-colors ${
                 active
-                  ? 'border-emerald-500 bg-emerald-500/15 text-emerald-200'
-                  : 'border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-600'
+                  ? 'border-emerald-500 bg-emerald-500/15 text-emerald-700 dark:text-emerald-200'
+                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:border-slate-600'
               }`}
             >
               <div className="font-semibold">{sc.label}</div>

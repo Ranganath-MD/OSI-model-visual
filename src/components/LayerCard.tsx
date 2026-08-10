@@ -49,14 +49,15 @@ export function LayerCard({ layer, side, compact }: Props) {
       aria-label={`Layer ${layer.number} ${layer.name} on ${side} side. Press Enter for details.`}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className="relative cursor-pointer rounded-xl border p-3 transition-colors"
-      style={{
-        borderColor: isActive ? layer.color : 'rgba(148,163,184,0.25)',
-        backgroundColor: isActive
-          ? `${layer.color}22`
+      className={`relative cursor-pointer rounded-xl border p-3 transition-colors ${
+        isActive
+          ? 'bg-slate-100 dark:bg-slate-900/60'
           : isProcessed
-            ? `${layer.color}10`
-            : 'rgba(15,23,42,0.45)',
+            ? 'bg-slate-50 dark:bg-slate-900/30'
+            : 'bg-white dark:bg-slate-900/45'
+      }`}
+      style={{
+        borderColor: isActive ? layer.color : undefined,
         boxShadow: isActive ? `0 0 0 2px ${layer.color}55` : 'none',
       }}
     >
@@ -70,13 +71,13 @@ export function LayerCard({ layer, side, compact }: Props) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="truncate text-sm font-semibold text-slate-100">
+            <h3 className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
               {layer.name}
             </h3>
             {!compact && scenarioProto && (
               <span
                 className="rounded px-1.5 py-0.5 text-[10px] font-medium"
-                style={{ backgroundColor: `${layer.color}33`, color: layer.color }}
+                style={{ backgroundColor: `${layer.color}22`, color: layer.color }}
                 title={scenarioProto.note ?? scenarioProto.name}
               >
                 {scenarioProto.name}
@@ -84,7 +85,7 @@ export function LayerCard({ layer, side, compact }: Props) {
             )}
           </div>
           {!compact && (
-            <p className="mt-0.5 line-clamp-2 text-xs text-slate-400">
+            <p className="mt-0.5 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">
               {layer.description}
             </p>
           )}
@@ -93,7 +94,7 @@ export function LayerCard({ layer, side, compact }: Props) {
               {layer.protocols.slice(0, 3).map((p) => (
                 <span
                   key={p}
-                  className="rounded bg-slate-800/70 px-1.5 py-0.5 text-[10px] text-slate-300"
+                  className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600 dark:bg-slate-800/70 dark:text-slate-300"
                 >
                   {p}
                 </span>
@@ -115,7 +116,7 @@ export function LayerCard({ layer, side, compact }: Props) {
           e.stopPropagation();
           handleJump();
         }}
-        className="absolute right-2 top-2 rounded text-[10px] text-slate-500 hover:text-slate-200"
+        className="absolute right-2 top-2 rounded text-[10px] text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200"
         aria-label={`Jump animation to ${side} layer ${layer.number}`}
         title="Jump to this step"
       >
