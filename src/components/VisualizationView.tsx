@@ -6,6 +6,7 @@ import { AnimationControls } from './AnimationControls';
 import { ScenarioSelector } from './ScenarioSelector';
 import { StepDescription } from './StepDescription';
 import { getLayer } from '@/data/networkData';
+import { t, tLayerName, tHeaderName, type Lang } from '@/i18n/translations';
 import { Cable, Wifi, Waves } from 'lucide-react';
 import type { LayerNumber } from '@/types';
 
@@ -13,16 +14,24 @@ export function VisualizationView() {
   const step = useStore((s) => s.step);
   const phases = useStore((s) => s.phases);
   const scenario = useStore((s) => s.scenario);
+  const lang = useStore((s) => s.lang);
   const currentPhase = phases[step];
 
   const activeLayer: LayerNumber | null = activeLayerAt(step, phases);
   const activeLayerInfo = activeLayer ? getLayer(activeLayer) : null;
   const action =
     currentPhase?.kind === 'sender'
-      ? 'Encapsulating'
+      ? t('actionEncapsulating', lang)
       : currentPhase?.kind === 'receiver'
-        ? 'Decapsulating'
-        : 'Transmitting bits';
+        ? t('actionDecapsulating', lang)
+        : t('actionTransmitting', lang);
+
+  const mediumLabel =
+    scenario.transportType === 'wifi'
+      ? t('mediumWifi', lang)
+      : scenario.transportType === 'fiber'
+        ? t('mediumFiber', lang)
+        : t('mediumCable', lang);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
@@ -33,7 +42,7 @@ export function VisualizationView() {
       <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr_1fr]">
         {/* Sender */}
         <div className="flex flex-col gap-3">
-          <OsiStack side="sender" title="Sender" subtitle="Encapsulation ↓" />
+          <OsiStack side="sender" title={t('sender', lang)} subtitle={t('encapsulationDown', lang)} />
         </div>
 
         {/* Center: data units + medium */}
@@ -47,7 +56,11 @@ export function VisualizationView() {
             </div>
           </div>
 
-          <Medium transportType={scenario.transportType} active={currentPhase?.kind === 'medium'} />
+          <Medium
+            transportType={scenario.transportType}
+            active={currentPhase?.kind === 'medium'}
+            label={mediumLabel}
+          />
 
           {/* Current action banner */}
           <AnimatePresence mode="wait">
@@ -68,10 +81,10 @@ export function VisualizationView() {
               </div>
               <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                 {currentPhase?.kind === 'medium'
-                  ? `Bits traveling via ${scenario.transportType}`
+                  ? `${t('bitsTraveling', lang)} ${mediumLabel}`
                   : activeLayerInfo
-                    ? `L${activeLayerInfo.number} ${activeLayerInfo.name}: ${activeLayerInfo.headerName}`
-                    : 'Ready'}
+                    ? `L${activeLayerInfo.number} ${tLayerName(activeLayerInfo.number, lang)}: ${tHeaderName(activeLayerInfo.number, lang)}`
+                    : t('ready', lang)}
               </div>
             </motion.div>
           </AnimatePresence>
@@ -84,7 +97,7 @@ export function VisualizationView() {
 
         {/* Receiver */}
         <div className="flex flex-col gap-3">
-          <OsiStack side="receiver" title="Receiver" subtitle="Decapsulation ↑" />
+          <OsiStack side="receiver" title={t('receiver', lang)} subtitle={t('decapsulationUp', lang)} />
         </div>
       </div>
     </div>
@@ -94,13 +107,13 @@ export function VisualizationView() {
 function Medium({
   transportType,
   active,
+  label,
 }: {
   transportType: 'cable' | 'fiber' | 'wifi';
   active: boolean;
+  label: string;
 }) {
   const Icon = transportType === 'wifi' ? Wifi : transportType === 'fiber' ? Waves : Cable;
-  const label =
-    transportType === 'wifi' ? 'Wi-Fi Radio' : transportType === 'fiber' ? 'Optical Fiber' : 'Ethernet Cable';
 
   return (
     <motion.div

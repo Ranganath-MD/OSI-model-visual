@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useStore } from '@/store/useStore';
 import { SkipBack, SkipForward, Play, Pause, RotateCcw } from 'lucide-react';
+import { t } from '@/i18n/translations';
 
 export function AnimationControls() {
   const isPlaying = useStore((s) => s.isPlaying);
@@ -13,13 +14,14 @@ export function AnimationControls() {
   const speedMs = useStore((s) => s.speedMs);
   const setSpeed = useStore((s) => s.setSpeed);
   const phases = useStore((s) => s.phases);
+  const lang = useStore((s) => s.lang);
 
   const progress = (step / maxStep) * 100;
   const currentLabel = (() => {
     const p = phases[step];
     if (!p) return '—';
-    if (p.kind === 'medium') return 'Medium (Bits)';
-    return `${p.kind === 'sender' ? 'Sender' : 'Receiver'} • L${p.layer}`;
+    if (p.kind === 'medium') return t('mediumBits', lang);
+    return `${p.kind === 'sender' ? t('sender', lang) : t('receiver', lang)} • L${p.layer}`;
   })();
 
   const btnBase =
@@ -44,23 +46,23 @@ export function AnimationControls() {
           <button onClick={next} disabled={step >= maxStep} aria-label="Step forward" className={btnBase}>
             <SkipForward className="h-4 w-4" />
           </button>
-          <button onClick={reset} aria-label="Reset animation" className={btnBase}>
+          <button onClick={reset} aria-label="Reset" className={btnBase}>
             <RotateCcw className="h-4 w-4" />
           </button>
         </div>
 
         <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-          <label htmlFor="speed" className="hidden sm:inline">Speed</label>
+          <label htmlFor="speed" className="hidden sm:inline">{t('speed', lang)}</label>
           <select
             id="speed"
             value={speedMs}
             onChange={(e) => setSpeed(Number(e.target.value))}
             className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-            aria-label="Animation speed"
+            aria-label={t('speed', lang)}
           >
-            <option value={2400}>Slow</option>
-            <option value={1400}>Normal</option>
-            <option value={700}>Fast</option>
+            <option value={2400}>{t('speedSlow', lang)}</option>
+            <option value={1400}>{t('speedNormal', lang)}</option>
+            <option value={700}>{t('speedFast', lang)}</option>
           </select>
         </div>
       </div>

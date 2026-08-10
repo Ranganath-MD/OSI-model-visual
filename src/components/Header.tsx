@@ -1,23 +1,26 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Moon, Sun, X, HelpCircle } from 'lucide-react';
+import { Moon, Sun, X, HelpCircle, Languages } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import type { View } from '@/store/useStore';
-
-const VIEWS: { id: View; label: string }[] = [
-  { id: 'visualization', label: 'Visualization' },
-  { id: 'explainer', label: 'Encapsulation' },
-  { id: 'comparison', label: 'OSI vs TCP/IP' },
-];
+import { t } from '@/i18n/translations';
 
 export function Header() {
   const theme = useStore((s) => s.theme);
   const toggleTheme = useStore((s) => s.toggleTheme);
+  const lang = useStore((s) => s.lang);
+  const toggleLang = useStore((s) => s.toggleLang);
   const view = useStore((s) => s.view);
   const setView = useStore((s) => s.setView);
   const onboarding = useStore((s) => s.onboarding);
   const setOnboarding = useStore((s) => s.setOnboarding);
   const [tourOpen, setTourOpen] = useState(false);
+
+  const VIEWS: { id: View; label: string }[] = [
+    { id: 'visualization', label: t('navVisualization', lang) },
+    { id: 'explainer', label: t('navExplainer', lang) },
+    { id: 'comparison', label: t('navComparison', lang) },
+  ];
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
@@ -28,10 +31,10 @@ export function Header() {
           </div>
           <div>
             <h1 className="text-base font-bold text-slate-900 dark:text-slate-100">
-              OSI Model Explorer
+              {t('appTitle', lang)}
             </h1>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Interactive guide to encapsulation &amp; decapsulation
+              {t('appSubtitle', lang)}
             </p>
           </div>
         </div>
@@ -67,9 +70,18 @@ export function Header() {
           <button
             onClick={() => setTourOpen(true)}
             className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-            aria-label="How to use this app"
+            aria-label={t('tourTitle', lang)}
           >
             <HelpCircle className="h-5 w-5" />
+          </button>
+          <button
+            onClick={toggleLang}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+            aria-label="Switch language"
+            title={lang === 'en' ? 'ಕನ್ನಡಕ್ಕೆ ಬದಲಿಸಿ' : 'Switch to English'}
+          >
+            <Languages className="h-4 w-4" />
+            <span>{lang === 'en' ? 'EN' : 'ಕನ್'}</span>
           </button>
           <button
             onClick={toggleTheme}
@@ -96,13 +108,8 @@ export function Header() {
 }
 
 function Tour({ onClose }: { onClose: () => void }) {
-  const steps = [
-    'Pick a scenario (Email, Webpage, Video) to see real protocols at each layer.',
-    'Press Play to watch data travel down the sender stack (encapsulation) and up the receiver stack (decapsulation).',
-    'Use Step Forward / Back to inspect any single layer in detail.',
-    'Click any layer card to open a detailed explanation panel.',
-    'Switch views to see the Encapsulation timeline or compare OSI with TCP/IP.',
-  ];
+  const lang = useStore((s) => s.lang);
+  const steps = t('tourSteps', lang) as unknown as string[];
   const [i, setI] = useState(0);
   return (
     <motion.div
@@ -112,7 +119,7 @@ function Tour({ onClose }: { onClose: () => void }) {
       exit={{ opacity: 0 }}
       onClick={onClose}
       role="dialog"
-      aria-label="How to use"
+      aria-label={t('tourTitle', lang)}
     >
       <div className="absolute inset-0 bg-black/60" />
       <motion.div
@@ -123,7 +130,7 @@ function Tour({ onClose }: { onClose: () => void }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">How to use this app</h2>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t('tourTitle', lang)}</h2>
           <button
             onClick={onClose}
             aria-label="Close tour"
@@ -150,7 +157,7 @@ function Tour({ onClose }: { onClose: () => void }) {
                 onClick={() => setI(i - 1)}
                 className="rounded-lg bg-slate-100 px-3 py-1 text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-200"
               >
-                Back
+                {t('tourBack', lang)}
               </button>
             )}
             {i < steps.length - 1 ? (
@@ -158,11 +165,11 @@ function Tour({ onClose }: { onClose: () => void }) {
                 onClick={() => setI(i + 1)}
                 className="rounded-lg bg-emerald-600 px-3 py-1 text-xs text-white"
               >
-                Next
+                {t('tourNext', lang)}
               </button>
             ) : (
               <button onClick={onClose} className="rounded-lg bg-emerald-600 px-3 py-1 text-xs text-white">
-                Got it
+                {t('tourDone', lang)}
               </button>
             )}
           </div>

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { LayerNumber, ModelType, Phase, Scenario } from '@/types';
 import { SCENARIOS } from '@/data/networkData';
+import type { Lang } from '@/i18n/translations';
 
 export type View = 'visualization' | 'explainer' | 'comparison';
 
@@ -9,10 +10,13 @@ export interface AppState {
   view: View;
   model: ModelType;
   theme: 'dark' | 'light';
+  lang: Lang;
   onboarding: boolean;
   setView: (v: View) => void;
   setModel: (m: ModelType) => void;
   toggleTheme: () => void;
+  toggleLang: () => void;
+  setLang: (l: Lang) => void;
   setOnboarding: (v: boolean) => void;
 
   // layer detail panel
@@ -59,10 +63,13 @@ export const useStore = create<AppState>((set, get) => ({
   view: 'visualization',
   model: 'osi',
   theme: 'dark',
+  lang: 'en',
   onboarding: true,
   setView: (v) => set({ view: v }),
   setModel: (m) => set({ model: m }),
   toggleTheme: () => set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
+  toggleLang: () => set((s) => ({ lang: s.lang === 'en' ? 'kn' : 'en' })),
+  setLang: (l) => set({ lang: l }),
   setOnboarding: (v) => set({ onboarding: v }),
 
   selectedLayer: null,

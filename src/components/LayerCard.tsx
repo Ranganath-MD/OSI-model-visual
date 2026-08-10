@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import type { LayerInfo, Side } from '@/types';
 import { useStore, activeLayerAt } from '@/store/useStore';
+import { tLayerName, tLayerDesc } from '@/i18n/translations';
 
 interface Props {
   layer: LayerInfo;
@@ -14,6 +15,7 @@ export function LayerCard({ layer, side, compact }: Props) {
   const setStep = useStore((s) => s.setStep);
   const openLayer = useStore((s) => s.openLayer);
   const scenario = useStore((s) => s.scenario);
+  const lang = useStore((s) => s.lang);
 
   const activeLayer = activeLayerAt(step, phases);
   const isActive = activeLayer === layer.number;
@@ -46,7 +48,7 @@ export function LayerCard({ layer, side, compact }: Props) {
       }}
       role="button"
       tabIndex={0}
-      aria-label={`Layer ${layer.number} ${layer.name} on ${side} side. Press Enter for details.`}
+      aria-label={`Layer ${layer.number} ${tLayerName(layer.number, lang)}`}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       className={`relative cursor-pointer rounded-xl border p-3 transition-colors ${
@@ -72,7 +74,7 @@ export function LayerCard({ layer, side, compact }: Props) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h3 className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
-              {layer.name}
+              {tLayerName(layer.number, lang)}
             </h3>
             {!compact && scenarioProto && (
               <span
@@ -86,7 +88,7 @@ export function LayerCard({ layer, side, compact }: Props) {
           </div>
           {!compact && (
             <p className="mt-0.5 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">
-              {layer.description}
+              {tLayerDesc(layer.number, lang)}
             </p>
           )}
           {!compact && (
@@ -117,8 +119,8 @@ export function LayerCard({ layer, side, compact }: Props) {
           handleJump();
         }}
         className="absolute right-2 top-2 rounded text-[10px] text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200"
-        aria-label={`Jump animation to ${side} layer ${layer.number}`}
-        title="Jump to this step"
+        aria-label={`Jump to ${side} layer ${layer.number}`}
+        title="Jump"
       >
         →
       </button>

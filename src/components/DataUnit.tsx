@@ -1,11 +1,6 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '@/store/useStore';
-import {
-  senderEncapsulation,
-  receiverDecapsulation,
-  currentDataUnitName,
-  type EncapLevel,
-} from '@/hooks/useEncapsulation';
+import { t } from '@/i18n/translations';
 
 interface Props {
   side: 'sender' | 'receiver';
@@ -15,6 +10,7 @@ export function DataUnit({ side }: Props) {
   const step = useStore((s) => s.step);
   const phases = useStore((s) => s.phases);
   const scenario = useStore((s) => s.scenario);
+  const lang = useStore((s) => s.lang);
 
   const levels: EncapLevel[] =
     side === 'sender'
@@ -27,16 +23,17 @@ export function DataUnit({ side }: Props) {
 
   const unitName = currentDataUnitName(step, phases);
   const showStack = levels.length > 0;
+  const dataLabel = scenario.dataLabel;
 
   return (
     <div
       className="flex w-full flex-col items-center"
       role="img"
-      aria-label={`Data unit on ${side} side: ${unitName}`}
+      aria-label={`Data unit on ${side} side`}
     >
       <div className="mb-2 flex items-center gap-2">
         <span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
-          Current PDU
+          {t('currentPDU', lang)}
         </span>
         <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-semibold text-slate-800 dark:bg-slate-800 dark:text-slate-100">
           {unitName}
@@ -90,10 +87,10 @@ export function DataUnit({ side }: Props) {
           style={{ borderColor: isThisSideActive ? undefined : 'rgba(100,116,139,0.5)' }}
         >
           <div className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
-            Payload
+            {t('payload', lang)}
           </div>
           <div className="mt-0.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
-            {scenario.dataLabel}
+            {dataLabel}
           </div>
         </motion.div>
 
@@ -104,6 +101,7 @@ export function DataUnit({ side }: Props) {
 }
 
 function MediumTrail() {
+  const lang = useStore((s) => s.lang);
   return (
     <motion.div
       className="mt-3 flex items-center justify-center gap-1"
@@ -119,7 +117,12 @@ function MediumTrail() {
           transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.08 }}
         />
       ))}
-      <span className="ml-2 text-[10px] text-violet-600 dark:text-violet-300">bits traveling…</span>
+      <span className="ml-2 text-[10px] text-violet-600 dark:text-violet-300">
+        {t('bitsTravelingLabel', 'en')}
+      </span>
     </motion.div>
   );
 }
+
+import type { EncapLevel } from '@/hooks/useEncapsulation';
+import { senderEncapsulation, receiverDecapsulation, currentDataUnitName } from '@/hooks/useEncapsulation';

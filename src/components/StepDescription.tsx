@@ -2,23 +2,27 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowDown, ArrowUp, Radio, Info } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { getLayer } from '@/data/networkData';
-import type { LayerNumber } from '@/types';
+import { t, tTemplate, tLayerName, tHeaderName, tDataUnitName, type Lang } from '@/i18n/translations';
+import type { LayerNumber, Phase } from '@/types';
 
 function describeStep(
   step: number,
-  phases: ReturnType<typeof useStore.getState>['phases'],
-  scenario: ReturnType<typeof useStore.getState>['scenario'],
+  phases: Phase[],
+  scenarioId: string,
+  transportType: string,
+  lang: Lang,
 ): { title: string; body: string; icon: typeof ArrowDown; color: string } {
   const phase = phases[step];
-  if (!phase) return { title: 'Ready to begin', body: 'Press Play to start the animation.', icon: Info, color: '#64748b' };
+  if (!phase) return { title: t('stepReady', lang), body: t('stepReadyBody', lang), icon: Info, color: '#64748b' };
 
   if (phase.kind === 'medium') {
-    const mediumLabel =
-      scenario.transportType === 'wifi' ? 'Wi-Fi radio waves' :
-      scenario.transportType === 'fiber' ? 'optical fiber' : 'the Ethernet cable';
+    const mediumKey =
+      transportType === 'wifi' ? 'stepMediumWifi' :
+      transportType === 'fiber' ? 'stepMediumFiber' : 'stepMediumCable';
+    const mediumLabel = t(mediumKey as 'stepMediumWifi', lang);
     return {
-      title: `Bits travel across ${mediumLabel}`,
-      body: `The fully encapsulated frame is now transmitted as a stream of raw bits across ${mediumLabel}. During transmission, these bits are converted into physical signals — electrical pulses, light, or radio waves — and travel from the sender's NIC to the receiver's NIC.`,
+      title: tTemplate('stepMediumTitle', lang, { medium: mediumLabel }),
+      body: tTemplate('stepMediumBody', lang, { medium: mediumLabel }),
       icon: Radio,
       color: '#8b5cf6',
     };
@@ -26,29 +30,46 @@ function describeStep(
 
   const layerNum = phase.layer as LayerNumber;
   const layer = getLayer(layerNum);
-  const proto = scenario.layerProtocols[layerNum];
+  const layerName = tLayerName(layerNum, lang);
+  const headerName = tHeaderName(layerNum, lang);
+  const dataUnit = tDataUnitName(layerNum, lang);
+  const protoName = layer.protocols[0];
+  const nextLabel = phase.kind === 'sender'
+    ? (layer.number - 1 === 0 ? t('stepNextPhysical', lang) : String(layer.number - 1))
+    : (layer.number + 1 > 7 ? t('stepNextApplication', lang) : String(layer.number + 1));
 
   if (phase.kind === 'sender') {
     return {
-      title: `Sender: L${layer.number} ${layer.name} adds ${layer.headerName}`,
-      body:
-        `The sender's ${layer.name} layer (${proto ? proto.name : layer.protocols[0]}) processes the data and ` +
-        `prepends a ${layer.headerName}. This header carries addressing, control, and protocol-specific ` +
-        `information needed by the receiver's matching layer. The result is a ${layer.dataUnitName} ` +
-        `passed down to layer ${layer.number - 1 || 'the physical medium'}.`,
+      title: tTemplate('stepSenderTitle', lang, {
+        n: String(layer.number),
+        layer: layerName,
+        header: headerName,
+      }),
+      body: tTemplate('stepSenderBody', lang, {
+        layer: layerName,
+        proto: protoName,
+        header: headerName,
+        dataUnit,
+        next: nextLabel,
+      }),
       icon: ArrowDown,
       color: layer.color,
     };
   }
 
-  // receiver
   return {
-    title: `Receiver: L${layer.number} ${layer.name} removes ${layer.headerName}`,
-    body:
-      `The receiver's ${layer.name} layer (${proto ? proto.name : layer.protocols[0]}) reads the ` +
-      `${layer.headerName} to verify addressing and integrity, then strips it away. The remaining ` +
-      `payload is passed up to layer ${layer.number + 1 > 7 ? 'the application' : layer.number + 1} ` +
-      `as a ${layer.dataUnitName}.`,
+    title: tTemplate('stepReceiverTitle', lang, {
+      n: String(layer.number),
+      layer: layerName,
+      header: headerName,
+    }),
+    body: tTemplate('stepReceiverBody', lang, {
+      layer: layerName,
+      proto: protoName,
+      header: headerName,
+      dataUnit,
+      next: nextLabel,
+    }),
     icon: ArrowUp,
     color: layer.color,
   };
@@ -58,14 +79,21 @@ export function StepDescription() {
   const step = useStore((s) => s.step);
   const phases = useStore((s) => s.phases);
   const scenario = useStore((s) => s.scenario);
+  const lang = useStore((s) => s.lang);
 
-  const { title, body, icon: Icon, color } = describeStep(step, phases, scenario);
+  const { title, body, icon: Icon, color } = describeStep(
+    step,
+    phases,
+    scenario.id,
+    scenario.transportType,
+    lang,
+  );
 
   return (
     <motion.div
       className="w-full rounded-xl border border-slate-200 bg-white/80 p-4 backdrop-blur dark:border-slate-700/60 dark:bg-slate-900/70"
       aria-live="polite"
-      aria-label="Current step description"
+      aria-label={lang === 'kn' ? 'ಪ್ರಸ್ತುತ ಹಂತದ ವಿವರಣೆ' : 'Current step description'}
     >
       <AnimatePresence mode="wait">
         <motion.div
