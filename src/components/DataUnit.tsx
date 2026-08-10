@@ -1,0 +1,133 @@
+import { AnimatePresence, motion } from 'framer-motion';
+import { useStore } from '@/store/useStore';
+import {
+  senderEncapsulation,
+  receiverDecapsulation,
+  currentDataUnitName,
+  type EncapLevel,
+} from '@/hooks/useEncapsulation';
+
+interface Props {
+  side: 'sender' | 'receiver';
+}
+
+export function DataUnit({ side }: Props) {
+  const step = useStore((s) => s.step);
+  const phases = useStore((s) => s.phases);
+  const scenario = useStore((s) => s.scenario);
+
+  const levels: EncapLevel[] =
+    side === 'sender'
+      ? senderEncapsulation(step, phases)
+      : receiverDecapsulation(step, phases);
+
+  const currentPhase = phases[step];
+  const isThisSideActive =
+    currentPhase && currentPhase.kind === side;
+  const isMediumActive = currentPhase?.kind === 'medium';
+
+  const unitName = currentDataUnitName(step, phases);
+
+  // For the receiver, before its turn, show full stack (mirror of sender at L1)
+  const showStack = levels.length > 0;
+
+  return (
+    <div
+      className="flex w-full flex-col items-center"
+      role="img"
+      aria-label={`Data unit on ${side} side: ${unitName}`}
+    >
+      <div className="mb-2 flex items-center gap-2">
+        <span className="text-[11px] uppercase tracking-wider text-slate-400">
+          Current PDU
+        </span>
+        <span
+          className="rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-semibold text-slate-100"
+        >
+          {unitName}
+        </span>
+      </div>
+
+      <div className="relative flex min-h-[180px] w-full max-w-[260px] flex-col items-stretch justify-center">
+        <AnimatePresence mode="popLayout">
+          {showStack ? (
+            // Stack headers outermost-first: top = lowest layer processed
+            levels.map((lvl, idx) => {
+              const isOuter = idx === 0;
+              return (
+                <motion.div
+                  key={`${side}-${lvl.layer}`}
+                  layout
+                  initial={{ opacity: 0, y: -10, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.96 }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+                  className="mb-1 rounded-md border px-2 py-1 text-center text-[10px] font-medium"
+                  style={{
+                    borderColor: `${lvl.color}66`,
+                    backgroundColor: `${lvl.color}1f`,
+                    color: lvl.color,
+                  }}
+                  title={lvl.headerLabel}
+                >
+                  {lvl.headerLabel}
+                  {isOuter && isThisSideActive && (
+                    <motion.span
+                      layoutId={`adding-${side}`}
+                      className="ml-1 inline-block text-emerald-300"
+                      aria-hidden
+                    >
+                      +
+                    </motion.span>
+                  )}
+                </motion.div>
+              );
+            })
+          ) : null}
+        </AnimatePresence>
+
+        {/* Payload */}
+        <motion.div
+          layout
+          className="rounded-lg border-2 border-slate-600 bg-slate-900 px-3 py-3 text-center"
+          animate={{
+            scale: isThisSideActive ? 1.04 : 1,
+            borderColor: isThisSideActive ? '#10b981' : 'rgba(71,85,105,1)',
+          }}
+        >
+          <div className="text-[10px] uppercase tracking-wider text-slate-500">
+            Payload
+          </div>
+          <div className="mt-0.5 text-sm font-semibold text-slate-100">
+            {scenario.dataLabel}
+          </div>
+        </motion.div>
+
+        {isMediumActive && side === 'sender' && <MediumTrail />}
+      </div>
+    </div>
+  );
+}
+
+function MediumTrail() {
+  return (
+    <motion.div
+      className="mt-3 flex items-center justify-center gap-1"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      aria-hidden
+    >
+      {Array.from({ length: 8 }).map((_, i) => (
+        <motion.span
+          key={i}
+          className="h-1.5 w-1.5 rounded-full bg-violet-400"
+          animate={{ opacity: [0.2, 1, 0.2] }}
+          transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.08 }}
+        />
+      ))}
+      <span className="ml-2 text-[10px] text-violet-300">bits traveling…</span>
+    </motion.div>
+  );
+}
+
+
